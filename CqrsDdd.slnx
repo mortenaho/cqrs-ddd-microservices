@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Order/">
+    <Project Path="src/Order/Order.Api/Order.Api.csproj" />
+    <Project Path="src/Order/Order.Application/Order.Application.csproj" />
+    <Project Path="src/Order/Order.Domain/Order.Domain.csproj" />
+    <Project Path="src/Order/Order.Infrastructure/Order.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Product/">
+    <Project Path="src/Product/Product.Api/Product.Api.csproj" />
+    <Project Path="src/Product/Product.Application/Product.Application.csproj" />
+    <Project Path="src/Product/Product.Domain/Product.Domain.csproj" />
+    <Project Path="src/Product/Product.Infrastructure/Product.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/User/">
+    <Project Path="src/User/User.Api/User.Api.csproj" />
+    <Project Path="src/User/User.Application/User.Application.csproj" />
+    <Project Path="src/User/User.Domain/User.Domain.csproj" />
+    <Project Path="src/User/User.Infrastructure/User.Infrastructure.csproj" />
+  </Folder>
+</Solution>

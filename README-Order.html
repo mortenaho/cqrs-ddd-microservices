@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آموزش DDD با پروژه Order</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #273449;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #a78bfa;
+    --green: #34d399;
+    --orange: #fbbf24;
+    --red: #f87171;
+    --border: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, "Vazirmatn", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 2;
+    font-size: 16px;
+  }
+  .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+  header {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-bottom: 2px solid var(--accent);
+  }
+  header h1 { font-size: 2.2rem; margin: 0 0 8px; color: var(--accent); }
+  header p { color: var(--muted); margin: 0; font-size: 1.1rem; }
+  h2 {
+    color: var(--accent-2);
+    border-right: 4px solid var(--accent-2);
+    padding-right: 12px;
+    margin-top: 48px;
+    font-size: 1.6rem;
+  }
+  h3 { color: var(--accent); margin-top: 32px; font-size: 1.25rem; }
+  h4 { color: var(--green); margin-top: 24px; }
+  p, li { color: var(--text); }
+  .muted { color: var(--muted); }
+  code {
+    background: var(--code-bg);
+    color: #7dd3fc;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: "Consolas", "Fira Code", monospace;
+    font-size: 0.9em;
+    direction: ltr;
+    display: inline-block;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .note {
+    border-right: 4px solid var(--accent);
+    background: var(--panel-2);
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  .warn {
+    border-right: 4px solid var(--orange);
+    background: #2a230f;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  .good {
+    border-right: 4px solid var(--green);
+    background: #0f2a1f;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    background: var(--panel);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th, td { padding: 12px 14px; text-align: right; border-bottom: 1px solid var(--border); }
+  th { background: var(--panel-2); color: var(--accent); }
+  tr:last-child td { border-bottom: none; }
+  .toc { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; }
+  .toc ol { margin: 0; padding-right: 20px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .layer-box {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 10px 0;
+    border: 1px solid var(--border);
+  }
+  .layer-domain { background: #11261c; border-color: #1f6b47; }
+  .layer-app { background: #102132; border-color: #1f5a8b; }
+  .layer-infra { background: #2a1b2e; border-color: #6b3b78; }
+  .layer-api { background: #2a2410; border-color: #7a6320; }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: var(--panel-2);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    direction: rtl;
+  }
+  .flow-step {
+    background: var(--panel-2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    border-right: 3px solid var(--accent);
+  }
+  .arrow { text-align: center; color: var(--muted); font-size: 1.2rem; }
+  .emoji { font-style: normal; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>آموزش DDD با پروژه Order</h1>
+  <p>یاد بگیر Domain-Driven Design و CQRS چطور در سرویس سفارش کار می‌کنند</p>
+</header>
+
+<div class="container">
+
+  <div class="toc">
+    <strong>فهرست مطالب</strong>
+    <ol>
+      <li><a href="#intro">سرویس Order چه کاری می‌کند؟</a></li>
+      <li><a href="#layers">چهار لایه پروژه</a></li>
+      <li><a href="#ddd">مفاهیم DDD با مثال واقعی</a>
+        <ol>
+          <li><a href="#entity">Entity (موجودیت)</a></li>
+          <li><a href="#valueobject">Value Object (شیء ارزشی)</a></li>
+          <li><a href="#aggregate">Aggregate و Aggregate Root</a></li>
+          <li><a href="#event">Domain Event (رویداد دامنه)</a></li>
+        </ol>
+      </li>
+      <li><a href="#cqrs">CQRS با مثال واقعی</a>
+        <ol>
+          <li><a href="#command">Command (فرمان)</a></li>
+          <li><a href="#query">Query (پرس‌وجو)</a></li>
+          <li><a href="#handler">Handler (پردازشگر)</a></li>
+          <li><a href="#validation">FluentValidation و ValidationBehavior</a></li>
+        </ol>
+      </li>
+      <li><a href="#flow">جریان کامل ساخت یک سفارش</a></li>
+      <li><a href="#db">ذخیره‌سازی در دیتابیس (چرا OrderLine جدا نیست؟)</a>
+        <ol>
+          <li><a href="#apply-config">EF Core چطور Configuration را پیدا می‌کند؟</a></li>
+        </ol>
+      </li>
+      <li><a href="#micro">ارتباط با سرویس‌های دیگر</a></li>
+      <li><a href="#run">اجرا و تست</a></li>
+    </ol>
+  </div>
+
+  <!-- ============ INTRO ============ -->
+  <h2 id="intro">۱. سرویس Order چه کاری می‌کند؟</h2>
+  <p>
+    سرویس <strong>Order</strong> مسئول مدیریت سفارش‌هاست. کارهای اصلی‌اش:
+  </p>
+  <ul>
+    <li>ساخت سفارش جدید (با چند قلم کالا)</li>
+    <li>دیدن یک سفارش یا همه سفارش‌های یک کاربر</li>
+    <li>لغو سفارش</li>
+  </ul>
+  <p>
+    اما نکته‌ی مهم این است: Order به‌تنهایی کار نمی‌کند. قبل از ساخت سفارش باید بپرسد:
+  </p>
+  <ul>
+    <li>آیا این <strong>کاربر</strong> وجود دارد و فعال است؟ <span class="muted">(از سرویس User می‌پرسد)</span></li>
+    <li>آیا این <strong>کالا</strong> موجود است و موجودی کافی دارد؟ <span class="muted">(از سرویس Product می‌پرسد)</span></li>
+  </ul>
+  <div class="note">
+    در معماری میکروسرویس، هر سرویس دیتابیس خودش را دارد و برای گرفتن اطلاعات سرویس دیگر، از طریق <strong>HTTP</strong> با آن حرف می‌زند.
+  </div>
+
+  <!-- ============ LAYERS ============ -->
+  <h2 id="layers">۲. چهار لایه پروژه</h2>
+  <p>پروژه Order به چهار پروژه (لایه) تقسیم شده. هر لایه فقط یک مسئولیت دارد:</p>
+
+  <div class="layer-box layer-domain">
+    <span class="badge">قلب پروژه</span>
+    <h4 style="margin-top:8px">🟢 Order.Domain — دامنه</h4>
+    <p class="muted" style="margin:0">قوانین کسب‌وکار اینجاست. هیچ وابستگی به دیتابیس یا فریم‌ورک ندارد.</p>
+    <p style="margin:8px 0 0">شامل: <code>OrderAggregate</code>، <code>OrderLine</code>، <code>OrderStatus</code>، Eventها، کلاس‌های پایه (<code>Entity</code>، <code>AggregateRoot</code>)</p>
+  </div>
+
+  <div class="layer-box layer-app">
+    <span class="badge">هماهنگ‌کننده</span>
+    <h4 style="margin-top:8px">🔵 Order.Application — اپلیکیشن</h4>
+    <p class="muted" style="margin:0">سناریوها را هماهنگ می‌کند: «وقتی سفارش می‌آید، چه اتفاقاتی به چه ترتیبی بیفتد؟»</p>
+    <p style="margin:8px 0 0">شامل: Commandها، Queryها، Handlerها، Validatorها، DTOها، Interfaceها</p>
+  </div>
+
+  <div class="layer-box layer-infra">
+    <span class="badge">دنیای بیرون</span>
+    <h4 style="margin-top:8px">🟣 Order.Infrastructure — زیرساخت</h4>
+    <p class="muted" style="margin:0">پیاده‌سازی واقعی دیتابیس و ارتباط با سرویس‌های دیگر.</p>
+    <p style="margin:8px 0 0">شامل: <code>OrderDbContext</code>، Repository، Configurationها، HttpClientها</p>
+  </div>
+
+  <div class="layer-box layer-api">
+    <span class="badge">درِ ورودی</span>
+    <h4 style="margin-top:8px">🟡 Order.Api — رابط HTTP</h4>
+    <p class="muted" style="margin:0">درخواست HTTP می‌گیرد و به Application تحویل می‌دهد.</p>
+    <p style="margin:8px 0 0">شامل: <code>OrdersController</code>، Request DTOها، <code>Program.cs</code></p>
+  </div>
+
+  <div class="card">
+    <strong>قانون طلایی وابستگی‌ها:</strong>
+    <div class="flow" style="margin-top:12px">
+      <div class="flow-step">Api → به Application و Infrastructure وابسته است</div>
+      <div class="flow-step">Application → فقط به Domain وابسته است</div>
+      <div class="flow-step">Infrastructure → به Application و Domain وابسته است</div>
+      <div class="flow-step">Domain → به <strong>هیچ‌چیز</strong> وابسته نیست (مستقل و خالص)</div>
+    </div>
+    <p class="muted" style="margin-top:12px">همه فلش‌ها به سمت Domain اشاره می‌کنند. قلب پروژه نباید بداند دیتابیس یا API چیست.</p>
+  </div>
+
+  <!-- ============ DDD ============ -->
+  <h2 id="ddd">۳. مفاهیم DDD با مثال واقعی</h2>
+
+  <h3 id="entity">۳.۱ Entity (موجودیت)</h3>
+  <p>
+    Entity چیزی است که با یک <strong>شناسه (Id)</strong> شناخته می‌شود، نه با محتوایش. حتی اگر تمام مشخصاتش عوض شود، تا وقتی Id یکی باشد، همان موجودیت است.
+  </p>
+  <p>مثال: یک «خط سفارش» (<code>OrderLine</code>). دو خط سفارش حتی اگر هر دو «۲ عدد لپ‌تاپ» باشند، باز هم دو موجودیت متفاوت‌اند چون Id جدا دارند.</p>
+  <pre><code>// کلاس پایه: هر موجودیت یک Id دارد
+public abstract class Entity
+{
+    public Guid Id { get; protected set; }
+    protected Entity() { }
+}</code></pre>
+  <pre><code>// OrderLine یک Entity است
+public sealed class OrderLine : Entity
+{
+    public Guid ProductId { get; private set; }
+    public string ProductName { get; private set; }
+    public int Quantity { get; private set; }
+    public decimal UnitPrice { get; private set; }
+    public decimal LineTotal => UnitPrice * Quantity;  // محاسباتی
+
+    // فقط از داخل همین assembly قابل ساخت است (internal)
+    internal static OrderLine Create(Guid productId, string name, int qty, decimal price)
+    {
+        if (qty &lt;= 0) throw new ArgumentException("Quantity must be > 0");
+        if (price &lt; 0) throw new ArgumentException("Price cannot be negative");
+        return new OrderLine { Id = Guid.NewGuid(), /* ... */ };
+    }
+}</code></pre>
+  <div class="note">
+    دقت کن همه setterها <code>private</code> هستند. یعنی از بیرون نمی‌توان مقادیر را عوض کرد — فقط از طریق متدهای کنترل‌شده. این یعنی <strong>کپسوله‌سازی</strong> (Encapsulation).
+  </div>
+
+  <h3 id="valueobject">۳.۲ Value Object (شیء ارزشی)</h3>
+  <p>
+    Value Object برعکس Entity است: با <strong>محتوایش</strong> شناخته می‌شود، نه با Id. دو Value Object با مقادیر یکسان، کاملاً برابرند.
+  </p>
+  <p>مثال کلاسیک: پول. «۱۰۰۰ تومان» همیشه برابر «۱۰۰۰ تومان» است. در سرویس <strong>Product</strong> این را داریم:</p>
+  <pre><code>public sealed class Money : ValueObject
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+    // دو Money با Amount و Currency یکسان، برابرند
+}</code></pre>
+  <div class="note">
+    در سرویس Order برای سادگی، قیمت به‌صورت <code>decimal</code> ساده نگه داشته شده. اما در Product مفهوم <code>Money</code> به‌عنوان Value Object پیاده شده تا تفاوت را ببینی.
+  </div>
+
+  <table>
+    <tr><th>ویژگی</th><th>Entity</th><th>Value Object</th></tr>
+    <tr><td>شناسایی با</td><td>Id</td><td>محتوا</td></tr>
+    <tr><td>قابل تغییر؟</td><td>بله (کنترل‌شده)</td><td>خیر (تغییرناپذیر)</td></tr>
+    <tr><td>مثال</td><td>OrderLine، OrderAggregate</td><td>Money، Email</td></tr>
+  </table>
+
+  <h3 id="aggregate">۳.۳ Aggregate و Aggregate Root</h3>
+  <p>
+    <strong>Aggregate</strong> یک گروه از اشیاء مرتبط است که با هم یک واحد را می‌سازند. در سرویس ما:
+  </p>
+  <div class="card">
+    <strong>Aggregate سفارش =</strong> یک <code>OrderAggregate</code> + چند <code>OrderLine</code> داخلش
+    <div class="flow" style="margin-top:12px">
+      <div class="flow-step">📦 OrderAggregate (ریشه / Root)
+        <div style="margin-top:8px; padding-right:20px;">
+          <div class="flow-step">📄 OrderLine ۱</div>
+          <div class="flow-step" style="margin-top:6px">📄 OrderLine ۲</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p>
+    <strong>Aggregate Root</strong> «رئیس» این گروه است. قانون مهم:
+  </p>
+  <div class="good">
+    <strong>همه تغییرات فقط باید از طریق ریشه انجام شوند.</strong> هیچ‌کس از بیرون حق ندارد مستقیماً یک <code>OrderLine</code> را دستکاری کند. باید از <code>OrderAggregate</code> بخواهد.
+  </div>
+
+  <p>ببین چطور پیاده شده:</p>
+  <pre><code>public sealed class OrderAggregate : AggregateRoot
+{
+    // لیست خطوط: private است! از بیرون دیده نمی‌شود
+    private readonly List&lt;OrderLine&gt; _lines = [];
+
+    public Guid UserId { get; private set; }
+    public OrderStatus Status { get; private set; }
+    public decimal TotalAmount { get; private set; }
+
+    // بیرون فقط یک کپی فقط-خواندنی می‌بیند
+    public IReadOnlyCollection&lt;OrderLine&gt; Lines => _lines.AsReadOnly();
+
+    private OrderAggregate() { }  // سازنده خصوصی
+
+    // تنها راه ساخت سفارش: این متد کارخانه‌ای (Factory Method)
+    public static OrderAggregate Create(Guid userId, IEnumerable&lt;...&gt; items)
+    {
+        var lineItems = items.ToList();
+        if (lineItems.Count == 0)
+            throw new ArgumentException("Order must contain at least one line item.");
+
+        var order = new OrderAggregate
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Status = OrderStatus.Confirmed,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // خطوط فقط از داخل ریشه ساخته می‌شوند
+        foreach (var item in lineItems)
+            order._lines.Add(OrderLine.Create(item.ProductId, item.ProductName,
+                                              item.Quantity, item.UnitPrice));
+
+        order.TotalAmount = order._lines.Sum(l => l.LineTotal);  // محاسبه جمع
+        order.RaiseDomainEvent(new OrderPlacedEvent(order.Id, userId, order.TotalAmount));
+        return order;
+    }
+
+    public void Cancel()
+    {
+        if (Status == OrderStatus.Cancelled)
+            throw new InvalidOperationException("Order is already cancelled.");
+        Status = OrderStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
+        RaiseDomainEvent(new OrderCancelledEvent(Id));
+    }
+}</code></pre>
+  <div class="note">
+    چرا این‌قدر سخت‌گیری؟ چون اگر هرکسی بتواند مستقیم خطوط را عوض کند، ممکن است <code>TotalAmount</code> با مجموع خطوط نخواند و دیتای ناسالم به‌وجود بیاید. ریشه تضمین می‌کند سفارش <strong>همیشه</strong> در وضعیت معتبر بماند.
+  </div>
+
+  <h4>کلاس پایه AggregateRoot</h4>
+  <pre><code>public abstract class AggregateRoot : Entity
+{
+    private readonly List&lt;IDomainEvent&gt; _domainEvents = [];
+    public IReadOnlyCollection&lt;IDomainEvent&gt; DomainEvents => _domainEvents.AsReadOnly();
+    protected void RaiseDomainEvent(IDomainEvent e) => _domainEvents.Add(e);
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}</code></pre>
+  <p>
+    تفاوت <code>AggregateRoot</code> با <code>Entity</code>: علاوه بر Id، می‌تواند <strong>رویداد دامنه (Domain Event)</strong> ثبت کند. به همین خاطر <code>OrderAggregate</code> از <code>AggregateRoot</code> ارث می‌برد ولی <code>OrderLine</code> فقط از <code>Entity</code>.
+  </p>
+
+  <h3 id="event">۳.۴ Domain Event (رویداد دامنه)</h3>
+  <p>
+    Domain Event یعنی «یک اتفاق مهم در کسب‌وکار افتاد». مثلاً «یک سفارش ثبت شد» یا «یک سفارش لغو شد». این رویدادها واقعیت‌های گذشته‌اند، پس اسمشان همیشه ماضی است.
+  </p>
+  <pre><code>public interface IDomainEvent
+{
+    DateTime OccurredOn { get; }  // کِی اتفاق افتاد
+}
+
+public sealed class OrderPlacedEvent : IDomainEvent
+{
+    public Guid OrderId { get; }
+    public Guid UserId { get; }
+    public decimal TotalAmount { get; }
+    public DateTime OccurredOn { get; }
+    // ...
+}</code></pre>
+  <p>وقتی سفارش ساخته می‌شود، داخل <code>Create</code> این خط اجرا می‌شود:</p>
+  <pre><code>order.RaiseDomainEvent(new OrderPlacedEvent(order.Id, userId, order.TotalAmount));</code></pre>
+  <div class="note">
+    این رویداد فعلاً فقط ثبت می‌شود (در لیست <code>_domainEvents</code>). در پروژه‌های واقعی می‌توان بعد از ذخیره‌سازی، این رویدادها را منتشر کرد تا مثلاً ایمیل تأیید بفرستد یا به سرویس انبار خبر بدهد. این کار اتصال سست (Loose Coupling) بین بخش‌ها می‌سازد.
+  </div>
+
+  <!-- ============ CQRS ============ -->
+  <h2 id="cqrs">۴. CQRS با مثال واقعی</h2>
+  <p>
+    CQRS یعنی <strong>جدا کردن نوشتن از خواندن</strong>:
+  </p>
+  <table>
+    <tr><th></th><th>Command (فرمان)</th><th>Query (پرس‌وجو)</th></tr>
+    <tr><td>کار</td><td>تغییر می‌دهد (نوشتن)</td><td>فقط می‌خواند</td></tr>
+    <tr><td>مثال</td><td>ساخت سفارش، لغو سفارش</td><td>دیدن سفارش</td></tr>
+    <tr><td>خروجی</td><td>معمولاً فقط Id یا هیچ</td><td>داده (DTO)</td></tr>
+  </table>
+  <p>
+    برای پیاده‌سازی، از کتابخانه‌ی <strong>MediatR</strong> استفاده می‌کنیم. کنترلر مستقیماً Handler را صدا نمی‌زند؛ یک پیام (Command/Query) به MediatR می‌دهد و MediatR خودش Handler مناسب را پیدا می‌کند.
+  </p>
+
+  <h3 id="command">۴.۱ Command (فرمان)</h3>
+  <p>هر Command سه بخش در یک فایل دارد: خود فرمان، قوانین اعتبارسنجی، و پردازشگر.</p>
+  <pre><code>// ۱) خود فرمان: فقط داده‌ها (یک record ساده)
+public sealed record CreateOrderCommand(
+    Guid UserId,
+    IReadOnlyList&lt;CreateOrderLineRequest&gt; Lines) : IRequest&lt;Guid&gt;;
+//                                                  ^^^^^^^^^^^^^ خروجی: Id سفارش
+
+// ۲) قوانین اعتبارسنجی
+public sealed class CreateOrderCommandValidator : AbstractValidator&lt;CreateOrderCommand&gt;
+{
+    public CreateOrderCommandValidator()
+    {
+        RuleFor(x => x.UserId).NotEmpty();
+        RuleFor(x => x.Lines).NotEmpty();
+        RuleForEach(x => x.Lines).ChildRules(line =>
+        {
+            line.RuleFor(l => l.ProductId).NotEmpty();
+            line.RuleFor(l => l.Quantity).GreaterThan(0);
+        });
+    }
+}</code></pre>
+
+  <h3 id="handler">۴.۲ Handler (پردازشگر)</h3>
+  <p>Handler جایی است که منطق سناریو اجرا می‌شود. این مهم‌ترین قسمت سرویس Order است:</p>
+  <pre><code>public sealed class CreateOrderCommandHandler : IRequestHandler&lt;CreateOrderCommand, Guid&gt;
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IUserServiceClient _userServiceClient;
+    private readonly IProductServiceClient _productServiceClient;
+    // (تزریق وابستگی از طریق سازنده)
+
+    public async Task&lt;Guid&gt; Handle(CreateOrderCommand request, CancellationToken ct)
+    {
+        // ۱) آیا کاربر وجود دارد؟ (تماس با سرویس User)
+        var user = await _userServiceClient.GetUserAsync(request.UserId, ct)
+            ?? throw new KeyNotFoundException($"User '{request.UserId}' not found.");
+
+        // ۲) آیا کاربر فعال است؟
+        if (!user.IsActive)
+            throw new InvalidOperationException("Cannot create order for inactive user.");
+
+        // ۳) برای هر قلم، کالا را از سرویس Product بگیر و موجودی را چک کن
+        var orderItems = new List&lt;(Guid, string, int, decimal)&gt;();
+        foreach (var line in request.Lines)
+        {
+            var product = await _productServiceClient.GetProductAsync(line.ProductId, ct)
+                ?? throw new KeyNotFoundException($"Product '{line.ProductId}' not found.");
+
+            if (product.StockQuantity &lt; line.Quantity)
+                throw new InvalidOperationException(
+                    $"Insufficient stock for '{product.Name}'.");
+
+            orderItems.Add((product.Id, product.Name, line.Quantity, product.Price));
+        }
+
+        // ۴) حالا که همه‌چیز معتبر است، سفارش را بساز (منطق در خود aggregate)
+        var order = OrderAggregate.Create(request.UserId, orderItems);
+
+        // ۵) ذخیره در دیتابیس
+        await _orderRepository.AddAsync(order, ct);
+        return order.Id;
+    }
+}</code></pre>
+  <div class="good">
+    <strong>توجه به تقسیم مسئولیت:</strong> Handler «هماهنگ‌کننده» است (چه کسی را صدا بزنم، به چه ترتیبی). اما تصمیم‌های کسب‌وکار مثل «جمع سفارش چقدر است» یا «سفارش باید حداقل یک قلم داشته باشد» داخل <code>OrderAggregate</code> هستند. Handler منطق دامنه را تکرار نمی‌کند.
+  </div>
+
+  <h3 id="query">۴.۳ Query (پرس‌وجو)</h3>
+  <p>Query فقط می‌خواند و یک DTO برمی‌گرداند (نه خود aggregate):</p>
+  <pre><code>public sealed record GetOrderByIdQuery(Guid OrderId) : IRequest&lt;OrderDto?&gt;;
+
+public sealed class GetOrderByIdQueryHandler
+    : IRequestHandler&lt;GetOrderByIdQuery, OrderDto?&gt;
+{
+    private readonly IOrderRepository _repository;
+
+    public async Task&lt;OrderDto?&gt; Handle(GetOrderByIdQuery request, CancellationToken ct)
+    {
+        var order = await _repository.GetByIdAsync(request.OrderId, ct);
+        return order?.ToDto();   // تبدیل aggregate به DTO
+    }
+}</code></pre>
+  <div class="note">
+    <strong>چرا DTO؟</strong> چون نمی‌خواهیم aggregate دامنه را مستقیم به بیرون بفرستیم. DTO یک «نمای ساده و امن» برای ارسال به کلاینت است و وابستگی بیرون را از ساختار داخلی دامنه جدا می‌کند.
+  </div>
+  <pre><code>public sealed record OrderDto(
+    Guid Id, Guid UserId, OrderStatus Status, decimal TotalAmount,
+    DateTime CreatedAt, DateTime? UpdatedAt, IReadOnlyList&lt;OrderLineDto&gt; Lines);</code></pre>
+
+  <h3 id="validation">۴.۴ FluentValidation و ValidationBehavior</h3>
+  <p>
+    سؤال: Validator را نوشتیم، اما چه کسی آن را اجرا می‌کند؟ جواب: <strong>ValidationBehavior</strong>.
+  </p>
+  <p>
+    این یک «حلقه میانی» (Pipeline Behavior) در MediatR است. هر Command/Query قبل از رسیدن به Handler، از این حلقه عبور می‌کند:
+  </p>
+  <pre><code>public sealed class ValidationBehavior&lt;TRequest, TResponse&gt;
+    : IPipelineBehavior&lt;TRequest, TResponse&gt; where TRequest : notnull
+{
+    private readonly IEnumerable&lt;IValidator&lt;TRequest&gt;&gt; _validators;
+
+    public async Task&lt;TResponse&gt; Handle(TRequest request,
+        RequestHandlerDelegate&lt;TResponse&gt; next, CancellationToken ct)
+    {
+        if (!_validators.Any()) return await next();  // ولیدیتوری نیست؟ رد شو
+
+        var context = new ValidationContext&lt;TRequest&gt;(request);
+        var results = await Task.WhenAll(
+            _validators.Select(v => v.ValidateAsync(context, ct)));
+        var failures = results.SelectMany(r => r.Errors).ToList();
+
+        if (failures.Count != 0)
+            throw new ValidationException(failures);  // خطا؟ به Handler نرو
+
+        return await next();  // همه‌چیز اوکی؟ برو به Handler بعدی
+    }
+}</code></pre>
+  <div class="flow">
+    <div class="flow-step">درخواست از کنترلر می‌آید</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step">🔍 ValidationBehavior — ولیدیتورها را اجرا می‌کند</div>
+    <div class="arrow">↓ (اگر معتبر بود)</div>
+    <div class="flow-step">⚙️ Handler — منطق اصلی اجرا می‌شود</div>
+  </div>
+  <p>این رفتار در DI ثبت می‌شود تا برای همه درخواست‌ها فعال باشد:</p>
+  <pre><code>services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
+services.AddValidatorsFromAssembly(assembly);
+services.AddTransient(typeof(IPipelineBehavior&lt;,&gt;), typeof(ValidationBehavior&lt;,&gt;));</code></pre>
+  <div class="good">
+    مزیت: Handlerها <strong>هرگز</strong> کد اعتبارسنجی ندارند. تمیز می‌مانند و فقط روی منطق تمرکز می‌کنند. اعتبارسنجی به‌صورت خودکار و یک‌جا انجام می‌شود.
+  </div>
+
+  <!-- ============ FULL FLOW ============ -->
+  <h2 id="flow">۵. جریان کامل ساخت یک سفارش</h2>
+  <p>حالا همه را کنار هم بگذاریم. وقتی کلاینت یک <code>POST /api/orders</code> می‌فرستد:</p>
+  <div class="flow">
+    <div class="flow-step"><strong>۱. OrdersController</strong> — درخواست HTTP را می‌گیرد، به <code>CreateOrderCommand</code> تبدیل می‌کند و <code>_mediator.Send(...)</code> صدا می‌زند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><strong>۲. ValidationBehavior</strong> — چک می‌کند UserId خالی نباشد، حداقل یک خط باشد، تعدادها مثبت باشند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><strong>۳. CreateOrderCommandHandler</strong> — کاربر را از سرویس User و کالاها را از سرویس Product می‌گیرد و چک می‌کند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><strong>۴. OrderAggregate.Create()</strong> — سفارش ساخته می‌شود، جمع محاسبه و رویداد <code>OrderPlacedEvent</code> ثبت می‌شود</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><strong>۵. OrderRepository.AddAsync()</strong> — سفارش (و خطوطش) در دیتابیس ذخیره می‌شوند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><strong>۶. Controller</strong> — پاسخ <code>201 Created</code> با Id سفارش برمی‌گرداند</div>
+  </div>
+
+  <p>و کنترلر این‌طور خطاها را به کد HTTP درست تبدیل می‌کند:</p>
+  <pre><code>[HttpPost]
+public async Task&lt;IActionResult&gt; Create([FromBody] CreateOrderRequest request, CancellationToken ct)
+{
+    try
+    {
+        var id = await _mediator.Send(new CreateOrderCommand(
+            request.UserId,
+            request.Lines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity)).ToList()), ct);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+    catch (KeyNotFoundException ex) { return NotFound(new { title = ex.Message }); }    // 404
+    catch (InvalidOperationException ex) { return Conflict(new { title = ex.Message }); } // 409
+}</code></pre>
+
+  <!-- ============ DB ============ -->
+  <h2 id="db">۶. ذخیره‌سازی در دیتابیس</h2>
+  <p>
+    در <code>OrderDbContext</code> فقط یک <code>DbSet</code> داریم — برای ریشه:
+  </p>
+  <pre><code>public sealed class OrderDbContext : DbContext
+{
+    public DbSet&lt;OrderAggregate&gt; Orders => Set&lt;OrderAggregate&gt;();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+}</code></pre>
+
+  <h3 id="apply-config">۶.۱ EF Core چطور کلاس Configuration را پیدا می‌کند؟</h3>
+  <p>
+    شاید بپرسی: ما کلاس <code>OrderAggregateConfiguration</code> را نوشتیم، اما هیچ‌جا <code>new</code> نکردیم و در DI هم ثبتش نکردیم. پس EF Core از کجا آن را می‌شناسد؟ جواب همین یک خط است:
+  </p>
+  <pre><code>modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderDbContext).Assembly);</code></pre>
+  <p>این خط به EF Core می‌گوید:</p>
+  <div class="note">
+    «در کل این Assembly (پروژه <code>Order.Infrastructure</code>) بگرد و هر کلاسی که <code>IEntityTypeConfiguration&lt;T&gt;</code> را پیاده کرده پیدا کن، یک نمونه از آن بساز و متد <code>Configure</code> را صدا بزن.»
+  </div>
+
+  <h4>قرارداد یک کلاس Configuration</h4>
+  <p>برای اینکه EF Core یک کلاس را به‌صورت خودکار پیدا کند، فقط سه شرط لازم است:</p>
+  <ul>
+    <li>کلاس <code>public</code> باشد</li>
+    <li>اینترفیس <code>IEntityTypeConfiguration&lt;T&gt;</code> را پیاده کند</li>
+    <li>در همان Assembly باشد که <code>ApplyConfigurationsFromAssembly</code> روی آن صدا زده شده</li>
+  </ul>
+  <pre><code>//          نام دلخواه                          قرارداد ↓        برای کدام entity ↓
+public sealed class OrderAggregateConfiguration : IEntityTypeConfiguration&lt;OrderAggregate&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;OrderAggregate&gt; builder)
+    {
+        // EF Core این متد را خودش صدا می‌زند
+    }
+}</code></pre>
+
+  <h4>EF Core پشت پرده چه می‌کند؟</h4>
+  <p>به‌صورت ساده‌شده، چیزی شبیه این اجرا می‌شود:</p>
+  <pre><code>// شبه‌کد داخل EF Core
+foreach (var type in assembly.GetTypes())
+{
+    if (type implements IEntityTypeConfiguration&lt;SomeEntity&gt;)
+    {
+        var instance = Activator.CreateInstance(type);   // ساخت نمونه
+        instance.Configure(modelBuilder.Entity&lt;SomeEntity&gt;());  // اجرای Configure
+    }
+}</code></pre>
+  <p>در پروژه ما دو کلاس پیدا و اجرا می‌شوند:</p>
+  <table>
+    <tr><th>کلاس Configuration</th><th>برای کدام entity</th><th>جدول</th></tr>
+    <tr><td>OrderAggregateConfiguration</td><td>OrderAggregate</td><td>Orders</td></tr>
+    <tr><td>OrderLineConfiguration</td><td>OrderLine</td><td>OrderLines</td></tr>
+  </table>
+
+  <h4>کل جریان از ابتدا</h4>
+  <div class="flow">
+    <div class="flow-step">برنامه بالا می‌آید و اولین بار <code>OrderDbContext</code> استفاده می‌شود</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step">EF Core متد <code>OnModelCreating</code> را صدا می‌زند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step"><code>ApplyConfigurationsFromAssembly</code> همه کلاس‌های <code>IEntityTypeConfiguration</code> را اسکن می‌کند</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step">برای هرکدام، متد <code>Configure</code> اجرا می‌شود (نگاشت جدول‌ها، کلیدها، رابطه‌ها)</div>
+    <div class="arrow">↓</div>
+    <div class="flow-step">مدل EF Core ساخته و کش می‌شود — آماده برای Migration و Query</div>
+  </div>
+  <div class="good">
+    <strong>مزیت:</strong> لازم نیست هر configuration را دستی ثبت کنی. هر وقت کلاس جدیدی با <code>IEntityTypeConfiguration</code> بسازی، خودکار شناسایی می‌شود. به همین خاطر هم <code>OrderLineConfiguration</code> بدون اینکه <code>DbSet</code> داشته باشد، باز هم اعمال می‌شود.
+  </div>
+  <div class="warn">
+    <strong>اگر این خط نبود چه می‌شد؟</strong> EF Core فقط از قراردادهای پیش‌فرض استفاده می‌کرد: اسم جدول‌ها اشتباه می‌شد، رابطه <code>_lines</code> درست map نمی‌شد، و <code>DomainEvents</code> و <code>Lines</code> ممکن بود اشتباهاً ستون دیتابیس در نظر گرفته شوند.
+  </div>
+
+  <div class="warn">
+    <strong>سؤال مهم: چرا برای <code>OrderLine</code> یک <code>DbSet</code> نگذاشتیم؟</strong>
+  </div>
+  <p>
+    چون <code>OrderLine</code> یک aggregate مستقل نیست — بخشی از داخل aggregate سفارش است. در DDD فقط ریشه‌ها <code>DbSet</code> می‌گیرند. این کار جلوی دستکاری مستقیم خطوط را می‌گیرد و مرز aggregate را حفظ می‌کند.
+  </p>
+  <p>
+    اما <code>OrderLine</code> همچنان جدول خودش (<code>OrderLines</code>) را دارد. EF Core از طریق <strong>رابطه</strong> آن را می‌شناسد:
+  </p>
+  <pre><code>public void Configure(EntityTypeBuilder&lt;OrderAggregate&gt; builder)
+{
+    builder.ToTable("Orders");
+    builder.HasKey(o => o.Id);
+    builder.Property(o => o.TotalAmount).HasPrecision(18, 2);
+
+    // رابطه یک-به-چند با خطوط؛ از فیلد خصوصی _lines استفاده کن
+    builder.HasMany&lt;OrderLine&gt;("_lines")
+        .WithOne()
+        .HasForeignKey("OrderId")
+        .OnDelete(DeleteBehavior.Cascade);      // سفارش حذف شد؟ خطوطش هم برود
+    builder.Navigation("_lines").UsePropertyAccessMode(PropertyAccessMode.Field);
+
+    builder.Ignore(o => o.Lines);          // پراپرتی فقط-خواندنی، نگاشت نمی‌شود
+    builder.Ignore(o => o.DomainEvents);   // رویدادها در دیتابیس ذخیره نمی‌شوند
+}</code></pre>
+  <p><strong>پس بدون DbSet چطور ذخیره می‌شود؟</strong> وقتی <code>order</code> را اضافه می‌کنی، EF Core کل گراف متصل را دنبال می‌کند:</p>
+  <pre><code>await _context.Orders.AddAsync(order, ct);   // فقط ریشه را اضافه کردیم
+await _context.SaveChangesAsync(ct);          // EF خودش خطوط داخلش را هم INSERT می‌کند</code></pre>
+  <p>نتیجه SQL تولیدشده:</p>
+  <pre><code>INSERT INTO Orders (Id, UserId, Status, TotalAmount, CreatedAt) VALUES (...);
+INSERT INTO OrderLines (Id, OrderId, ProductId, ProductName, Quantity, UnitPrice) VALUES (...);
+INSERT INTO OrderLines (...) VALUES (...);</code></pre>
+  <p>و موقع خواندن، با <code>Include</code> خطوط را هم می‌آوریم:</p>
+  <pre><code>return await _context.Orders
+    .Include("_lines")          // خطوط را هم بارگذاری کن
+    .FirstOrDefaultAsync(o => o.Id == id, ct);</code></pre>
+
+  <!-- ============ MICRO ============ -->
+  <h2 id="micro">۷. ارتباط با سرویس‌های دیگر</h2>
+  <p>
+    سرویس Order برای گرفتن اطلاعات User و Product، از طریق HTTP با آن‌ها حرف می‌زند. اما لایه Application نباید بداند HTTP چیست — پس یک <strong>Interface</strong> تعریف می‌کنیم:
+  </p>
+  <pre><code>// در لایه Application: فقط قرارداد
+public interface IUserServiceClient
+{
+    Task&lt;UserInfo?&gt; GetUserAsync(Guid userId, CancellationToken ct = default);
+}
+public sealed record UserInfo(Guid Id, string Email, string FullName, bool IsActive);</code></pre>
+  <p>و پیاده‌سازی واقعی HTTP در لایه Infrastructure است:</p>
+  <pre><code>// در لایه Infrastructure: پیاده‌سازی واقعی
+public sealed class UserServiceClient : IUserServiceClient
+{
+    private readonly HttpClient _httpClient;
+
+    public async Task&lt;UserInfo?&gt; GetUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var response = await _httpClient.GetAsync($"/api/users/{userId}", ct);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        var user = await response.Content.ReadFromJsonAsync&lt;UserApiResponse&gt;(ct);
+        return user is null ? null : new UserInfo(user.Id, user.Email, user.FullName, user.IsActive);
+    }
+}</code></pre>
+  <p>و در DI به هم وصل می‌شوند:</p>
+  <pre><code>services.AddHttpClient&lt;IUserServiceClient, UserServiceClient&gt;(client =>
+{
+    client.BaseAddress = new Uri(userServiceUrl);
+});</code></pre>
+  <div class="good">
+    <strong>این الگوی «وارونگی وابستگی» است:</strong> لایه Application فقط <code>IUserServiceClient</code> را می‌شناسد. اینکه پشتش HTTP باشد یا gRPC یا حتی یک Mock برای تست، مهم نیست. این باعث می‌شود کد قابل تست و قابل تغییر بماند.
+  </div>
+
+  <!-- ============ RUN ============ -->
+  <h2 id="run">۸. اجرا و تست</h2>
+  <p>چون Order به User و Product وابسته است، بهتر است هر سه را اجرا کنی.</p>
+  <h4>راه ۱: با Docker Compose (ساده‌تر)</h4>
+  <pre><code>docker compose up --build</code></pre>
+  <h4>راه ۲: دستی</h4>
+  <pre><code>dotnet run --project src/User/User.Api
+dotnet run --project src/Product/Product.Api
+dotnet run --project src/Order/Order.Api</code></pre>
+  <p>سپس Swagger سرویس Order را باز کن و یک سفارش بساز:</p>
+  <pre><code>POST /api/orders
+{
+  "userId": "GUID یک کاربر فعال",
+  "lines": [
+    { "productId": "GUID یک کالای موجود", "quantity": 2 }
+  ]
+}</code></pre>
+  <table>
+    <tr><th>متد</th><th>مسیر</th><th>کار</th></tr>
+    <tr><td>POST</td><td>/api/orders</td><td>ساخت سفارش</td></tr>
+    <tr><td>GET</td><td>/api/orders/{id}</td><td>دیدن یک سفارش</td></tr>
+    <tr><td>GET</td><td>/api/orders/user/{userId}</td><td>سفارش‌های یک کاربر</td></tr>
+    <tr><td>PUT</td><td>/api/orders/{id}/cancel</td><td>لغو سفارش</td></tr>
+  </table>
+
+  <hr>
+  <div class="card">
+    <h3 style="margin-top:0">جمع‌بندی نهایی</h3>
+    <ul>
+      <li><strong>Domain</strong> = قلب و قوانین (OrderAggregate، OrderLine، Eventها) — مستقل از همه‌چیز</li>
+      <li><strong>Application</strong> = هماهنگی سناریوها (Command/Query/Handler) با MediatR و FluentValidation</li>
+      <li><strong>Infrastructure</strong> = دیتابیس و ارتباط HTTP با سرویس‌های دیگر</li>
+      <li><strong>Api</strong> = درِ ورودی HTTP</li>
+      <li><strong>Aggregate Root</strong> تضمین می‌کند سفارش همیشه معتبر بماند</li>
+      <li><strong>CQRS</strong> نوشتن و خواندن را جدا می‌کند</li>
+      <li>فقط <strong>ریشه</strong> <code>DbSet</code> می‌گیرد؛ خطوط از طریق رابطه ذخیره می‌شوند</li>
+    </ul>
+  </div>
+
+  <p class="muted" style="text-align:center; margin-top:40px">
+    این فایل برای یادگیری DDD و CQRS با پروژه Order ساخته شده — موفق باشی! 🚀
+  </p>
+
+</div>
+</body>
+</html>
